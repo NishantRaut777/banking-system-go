@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/NishantRaut777/banking-api/internal/server"
+)
 
 func main() {
-	fmt.Println("Hello")
+	server.Start()
 }
