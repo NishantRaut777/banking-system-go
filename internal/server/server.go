@@ -12,6 +12,7 @@ import (
 	"github.com/NishantRaut777/banking-api/internal/config"
 	"github.com/NishantRaut777/banking-api/internal/database"
 	"github.com/NishantRaut777/banking-api/internal/routes"
+	"github.com/NishantRaut777/banking-api/internal/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -29,6 +30,8 @@ func Start() {
 	// connect to postgresql before starting server
 	database.Connect(cfg.DatabaseURL)
 	defer database.Close()
+
+	utils.SetJWTSecret(cfg.JWTSecret)
 
 	router := gin.New()
 	router.MaxMultipartMemory = 10 << 20

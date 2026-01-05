@@ -19,6 +19,7 @@ func Register(router *gin.Engine) {
 				handler := auth.NewHandler(service)
 
 				authGroup.POST("/signup", handler.Signup)
+				authGroup.POST("/login", handler.Login)
 			}
 		}
 	}

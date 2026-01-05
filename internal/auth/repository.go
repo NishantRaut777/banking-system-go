@@ -3,6 +3,9 @@ package auth
 import (
 	"context"
 
+	"github.com/NishantRaut777/banking-api/internal/database"
+	"github.com/NishantRaut777/banking-api/internal/models"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -16,8 +19,8 @@ func (r *Repository) CreateUserTx(
 	ctx context.Context,
 	tx pgx.Tx,
 	name, email, passwordHash, pinHash string,
-) (int64, error) {
-	var userID int64
+) (uuid.UUID, error) {
+	var userID uuid.UUID
 
 	query := `INSERT INTO users(name, email, password_hash, pin_hash) VALUES($1,$2,$3,$4) RETURNING id`
 
@@ -34,7 +37,7 @@ func (r *Repository) CreateUserTx(
 func (r *Repository) CreateAccountTx(
 	ctx context.Context,
 	tx pgx.Tx,
-	userID int64,
+	userID uuid.UUID,
 	accountNumber string,
 ) error {
 	query := `INSERT INTO accounts(user_id, account_number, balance) VALUES($1,$2,0)`
@@ -42,4 +45,22 @@ func (r *Repository) CreateAccountTx(
 	_, err := tx.Exec(ctx, query, userID, accountNumber)
 
 	return err
+}
+
+func (r *Repository) GetUserByEmail(
+	ctx context.Context,
+	email string,
+) (*models.User, error) {
+
+	query := `SELECT id, email, password_hash,status FROM users WHERE email = $1`
+
+	var user models.User
+
+	err := database.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.Email, &user.PasswordHash, &user.Status)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

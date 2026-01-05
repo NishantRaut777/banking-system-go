@@ -72,3 +72,29 @@ func (s *Service) Signup(
 
 	return nil
 }
+
+func (s *Service) Login(
+	ctx context.Context,
+	email, password string,
+) (string, error) {
+
+	user, err := s.repo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return "", errors.New("Invalid email or password")
+	}
+
+	if user.Status != "active" {
+		return "", errors.New("user account is not active")
+	}
+
+	if !utils.CompareHash(user.PasswordHash, password) {
+		return "", errors.New("Invalid email or password")
+	}
+
+	token, err := utils.GenerateJWT(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
