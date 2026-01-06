@@ -18,6 +18,11 @@ type AuthService interface {
 		ctx context.Context,
 		email, password string,
 	) (string, error)
+
+	GetProfile(
+		ctx context.Context,
+		userID uuid.UUID,
+	) (*models.User, error)
 }
 
 type AuthRepository interface {
@@ -37,5 +42,10 @@ type AuthRepository interface {
 	GetUserByEmail(
 		ctx context.Context,
 		email string,
+	) (*models.User, error)
+
+	GetUserByID(
+		ctx context.Context,
+		userID uuid.UUID,
 	) (*models.User, error)
 }

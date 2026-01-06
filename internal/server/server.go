@@ -39,7 +39,7 @@ func Start() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	routes.Register(router)
+	routes.Register(router, cfg)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{

@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"github.com/NishantRaut777/banking-api/internal/database"
+	"github.com/NishantRaut777/banking-api/internal/models"
 	"github.com/NishantRaut777/banking-api/internal/utils"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -97,4 +99,17 @@ func (s *Service) Login(
 	}
 
 	return token, nil
+}
+
+func (s *Service) GetProfile(
+	ctx context.Context,
+	userID uuid.UUID,
+) (*models.User, error) {
+
+	user, err := s.repo.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

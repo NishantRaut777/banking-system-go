@@ -5,6 +5,7 @@ import (
 
 	"github.com/NishantRaut777/banking-api/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -71,4 +72,28 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Token: token,
 	})
+}
+
+func (h *Handler) Me(c *gin.Context) {
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized",
+		})
+		return
+	}
+
+	userID := userIDValue.(uuid.UUID)
+
+	// call service
+	user, err := h.service.GetProfile(c.Request.Context(), userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
