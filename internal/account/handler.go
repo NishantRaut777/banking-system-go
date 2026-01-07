@@ -52,31 +52,18 @@ func (h *Handler) GetAccount(c *gin.Context) {
 }
 
 func (h *Handler) Deposit(c *gin.Context) {
-	accountIDStr := c.Param("id")
-
-	accountID, err := uuid.Parse(accountIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid account id",
-		})
-		return
-	}
-
-	// logged-in user_id from JWT
-	userID := c.MustGet("user_id").(uuid.UUID)
-
 	var req models.DepositRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	userID := c.MustGet("user_id").(uuid.UUID)
 
 	if err := h.service.Deposit(
 		c.Request.Context(),
 		userID,
-		accountID,
+		req.AccountID,
 		req.Amount,
 	); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -88,4 +75,28 @@ func (h *Handler) Deposit(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "deposit successful",
 	})
+}
+
+func (h *Handler) Withdraw(c *gin.Context) {
+	var req models.WithdrawRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := c.MustGet("user_id").(uuid.UUID)
+
+	err := h.service.Withdraw(
+		c.Request.Context(),
+		userID,
+		req.AccountID,
+		req.Amount,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "withdraw successful"})
 }

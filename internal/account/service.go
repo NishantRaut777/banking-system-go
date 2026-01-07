@@ -83,3 +83,51 @@ func (s *Service) Deposit(
 
 	return tx.Commit(ctx)
 }
+
+func (s *Service) Withdraw(
+	ctx context.Context,
+	userID uuid.UUID,
+	accountID uuid.UUID,
+	amount int64,
+) error {
+	tx, err := database.DB.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	accountUserID, balanceBefore, err := s.repo.GetAccountForUpdate(ctx, tx, accountID)
+	if err != nil {
+		return err
+	}
+
+	// allow withdraw only if logged in user is trying to deposit money in own account
+	if accountUserID != userID {
+		return errors.New("unauthorized account access")
+	}
+
+	if balanceBefore < amount {
+		return errors.New("insufficient balance")
+	}
+
+	balanceAfter := balanceBefore - amount
+
+	if err := s.repo.UpdateBalanceTx(ctx, tx, accountID, balanceAfter); err != nil {
+		return err
+	}
+
+	if err := s.repo.InsertTransactionTx(
+		ctx,
+		tx,
+		accountID,
+		"withdraw",
+		amount,
+		"success",
+		balanceBefore,
+		balanceAfter,
+	); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

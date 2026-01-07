@@ -16,5 +16,11 @@ type Account struct {
 }
 
 type DepositRequest struct {
-	Amount int64 `json:"amount" binding:"required,gt=0"`
+	AccountID uuid.UUID `json:"account_id" binding:"required"`
+	Amount    int64     `json:"amount" binding:"required,gt=0"`
+}
+
+type WithdrawRequest struct {
+	AccountID uuid.UUID `json:"account_id" binding:"required"`
+	Amount    int64     `json:"amount" binding:"required,gt=0"`
 }

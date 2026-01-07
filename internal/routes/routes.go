@@ -40,7 +40,8 @@ func Register(router *gin.Engine, cfg *config.Config) {
 			{
 				accountGroup.GET("/", accountHandler.GetMyAccounts)
 				accountGroup.GET("/:id", accountHandler.GetAccount)
-				accountGroup.POST("/:id/deposit", accountHandler.Deposit)
+				accountGroup.POST("/deposit", accountHandler.Deposit)
+				accountGroup.POST("/withdraw", accountHandler.Withdraw)
 			}
 		}
 	}

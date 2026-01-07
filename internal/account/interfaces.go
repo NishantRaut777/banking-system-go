@@ -18,6 +18,12 @@ type AccountService interface {
 		accountID uuid.UUID,
 		amount int64,
 	) error
+
+	Withdraw(ctx context.Context,
+		userID uuid.UUID,
+		accountID uuid.UUID,
+		amount int64,
+	) error
 }
 
 type AccountRepository interface {
