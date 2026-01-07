@@ -131,3 +131,66 @@ func (s *Service) Withdraw(
 
 	return tx.Commit(ctx)
 }
+
+func (s *Service) Transfer(
+	ctx context.Context,
+	userID uuid.UUID,
+	fromAccount uuid.UUID,
+	toAccount uuid.UUID,
+	amount int64,
+) error {
+
+	tx, err := database.DB.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	accounts, err := s.repo.GetAccountsForUpdate(ctx, tx, fromAccount, toAccount)
+
+	if err != nil {
+		return err
+	}
+
+	from := accounts[fromAccount]
+	to := accounts[toAccount]
+
+	if from.UserID != userID {
+		return errors.New("unauthorized sender account")
+	}
+
+	// balance check
+	if from.Balance < amount {
+		return errors.New("insufficient balance")
+	}
+
+	fromAfter := from.Balance - amount
+	toAfter := to.Balance + amount
+
+	// update account balance
+	if err := s.repo.UpdateBalanceTx(ctx, tx, fromAccount, fromAfter); err != nil {
+		return err
+	}
+	if err := s.repo.UpdateBalanceTx(ctx, tx, toAccount, toAfter); err != nil {
+		return err
+	}
+
+	if err := s.repo.InsertTransactionTx(
+		ctx, tx, fromAccount,
+		"transfer", amount,
+		"success", from.Balance, fromAfter,
+	); err != nil {
+		return err
+	}
+
+	if err := s.repo.InsertTransactionTx(
+		ctx, tx, toAccount,
+		"transfer", amount, "success",
+		to.Balance, toAfter,
+	); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+
+}

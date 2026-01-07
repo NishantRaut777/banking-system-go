@@ -42,6 +42,7 @@ func Register(router *gin.Engine, cfg *config.Config) {
 				accountGroup.GET("/:id", accountHandler.GetAccount)
 				accountGroup.POST("/deposit", accountHandler.Deposit)
 				accountGroup.POST("/withdraw", accountHandler.Withdraw)
+				accountGroup.POST("/transfer", accountHandler.Transfer)
 			}
 		}
 	}

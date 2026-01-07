@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"errors"
 
 	"github.com/NishantRaut777/banking-api/internal/database"
 	"github.com/NishantRaut777/banking-api/internal/models"
@@ -136,4 +137,47 @@ func (r *Repository) InsertTransactionTx(
 	)
 
 	return err
+}
+
+func (r *Repository) GetAccountsForUpdate(
+	ctx context.Context,
+	tx pgx.Tx,
+	acc1 uuid.UUID,
+	acc2 uuid.UUID,
+) (map[uuid.UUID]struct {
+	UserID  uuid.UUID
+	Balance int64
+}, error) {
+
+	query := `SELECT id, user_id, balance FROM accounts WHERE id IN ($1,$2) ORDER BY id FOR UPDATE`
+
+	rows, err := tx.Query(ctx, query, acc1, acc2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[uuid.UUID]struct {
+		UserID  uuid.UUID
+		Balance int64
+	})
+
+	for rows.Next() {
+		var id, userID uuid.UUID
+		var balance int64
+		if err := rows.Scan(&id, &userID, &balance); err != nil {
+			return nil, err
+		}
+
+		result[id] = struct {
+			UserID  uuid.UUID
+			Balance int64
+		}{userID, balance}
+	}
+
+	if len(result) != 2 {
+		return nil, errors.New("one or both accounts not found")
+	}
+
+	return result, nil
 }

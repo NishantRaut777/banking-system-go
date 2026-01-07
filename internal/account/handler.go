@@ -100,3 +100,33 @@ func (h *Handler) Withdraw(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "withdraw successful"})
 }
+
+func (h *Handler) Transfer(c *gin.Context) {
+	var req models.TransferRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.FromAccountID == req.ToAccountID {
+		c.JSON(400, gin.H{"error": "same account transfer not allowed"})
+		return
+	}
+
+	userID := c.MustGet("user_id").(uuid.UUID)
+
+	err := h.service.Transfer(
+		c.Request.Context(),
+		userID,
+		req.FromAccountID,
+		req.ToAccountID,
+		req.Amount,
+	)
+
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "transfer successful"})
+}

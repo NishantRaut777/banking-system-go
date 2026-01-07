@@ -24,6 +24,13 @@ type AccountService interface {
 		accountID uuid.UUID,
 		amount int64,
 	) error
+
+	Transfer(ctx context.Context,
+		userID uuid.UUID,
+		fromAccount uuid.UUID,
+		toAccount uuid.UUID,
+		amount int64,
+	) error
 }
 
 type AccountRepository interface {
@@ -42,6 +49,17 @@ type AccountRepository interface {
 		tx pgx.Tx,
 		accountID uuid.UUID,
 	) (uuid.UUID, int64, error)
+
+	// useful for transfer
+	GetAccountsForUpdate(
+		ctx context.Context,
+		tx pgx.Tx,
+		acc1 uuid.UUID,
+		acc2 uuid.UUID,
+	) (map[uuid.UUID]struct {
+		UserID  uuid.UUID
+		Balance int64
+	}, error)
 
 	UpdateBalanceTx(
 		ctx context.Context,

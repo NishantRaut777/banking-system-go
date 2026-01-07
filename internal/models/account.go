@@ -24,3 +24,9 @@ type WithdrawRequest struct {
 	AccountID uuid.UUID `json:"account_id" binding:"required"`
 	Amount    int64     `json:"amount" binding:"required,gt=0"`
 }
+
+type TransferRequest struct {
+	FromAccountID uuid.UUID `json:"from_account_id" binding:"required"`
+	ToAccountID   uuid.UUID `json:"to_account_id" binding:"required"`
+	Amount        int64     `json:"amount" binding:"required,gt=0"`
+}
