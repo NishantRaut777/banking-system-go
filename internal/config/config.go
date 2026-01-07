@@ -19,9 +19,6 @@ type Config struct {
 func LoadConfig() *Config {
 	_ = godotenv.Load()
 
-	jwt_secret := os.Getenv("JWT_SECRET")
-	fmt.Println("jwt secret is : ", jwt_secret)
-
 	cfg := &Config{
 		Port:        os.Getenv("PORT"),
 		Env:         os.Getenv("APP_ENV"),
