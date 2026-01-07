@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/NishantRaut777/banking-api/internal/account"
 	"github.com/NishantRaut777/banking-api/internal/auth"
 	"github.com/NishantRaut777/banking-api/internal/config"
 	"github.com/NishantRaut777/banking-api/internal/middleware"
@@ -28,6 +29,18 @@ func Register(router *gin.Engine, cfg *config.Config) {
 			userGroup.Use(middleware.AuthMiddleware([]byte(cfg.JWTSecret)))
 			{
 				userGroup.GET("/me", handler.Me)
+			}
+
+			accountRepo := account.NewRepository()
+			accountService := account.NewService(accountRepo)
+			accountHandler := account.NewHandler(accountService)
+
+			accountGroup := v1.Group("/accounts")
+			accountGroup.Use(middleware.AuthMiddleware([]byte(cfg.JWTSecret)))
+			{
+				accountGroup.GET("/", accountHandler.GetMyAccounts)
+				accountGroup.GET("/:id", accountHandler.GetAccount)
+				accountGroup.POST("/:id/deposit", accountHandler.Deposit)
 			}
 		}
 	}

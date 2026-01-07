@@ -1,0 +1,139 @@
+package account
+
+import (
+	"context"
+
+	"github.com/NishantRaut777/banking-api/internal/database"
+	"github.com/NishantRaut777/banking-api/internal/models"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+)
+
+type Repository struct{}
+
+func NewRepository() *Repository {
+	return &Repository{}
+}
+
+func (r *Repository) FindByUserID(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]models.Account, error) {
+
+	query := `SELECT id, user_id, account_number, balance, status, created_at FROM accounts WHERE user_id = $1`
+
+	rows, err := database.DB.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var accounts []models.Account
+
+	for rows.Next() {
+		var a models.Account
+		if err := rows.Scan(
+			&a.ID,
+			&a.UserID,
+			&a.AccountNumber,
+			&a.Balance,
+			&a.Status,
+			&a.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, a)
+	}
+	return accounts, nil
+}
+
+func (r *Repository) FindByIDAndUserID(
+	ctx context.Context,
+	accountID, userID uuid.UUID,
+) (*models.Account, error) {
+
+	query := `
+		SELECT id, user_id, account_number, balance, status, created_at
+		FROM accounts
+		WHERE id = $1 AND user_id = $2
+	`
+
+	var a models.Account
+	err := database.DB.QueryRow(ctx, query, accountID, userID).
+		Scan(
+			&a.ID,
+			&a.UserID,
+			&a.AccountNumber,
+			&a.Balance,
+			&a.Status,
+			&a.CreatedAt,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &a, nil
+}
+
+func (r *Repository) GetAccountForUpdate(
+	ctx context.Context,
+	tx pgx.Tx,
+	accountID uuid.UUID,
+) (uuid.UUID, int64, error) {
+
+	var userID uuid.UUID
+	var balance int64
+
+	query := `SELECT user_id, balance FROM accounts WHERE id = $1 FOR UPDATE`
+
+	err := tx.QueryRow(ctx, query, accountID).Scan(&userID, &balance)
+
+	return userID, balance, err
+}
+
+func (r *Repository) UpdateBalanceTx(
+	ctx context.Context,
+	tx pgx.Tx,
+	accountID uuid.UUID,
+	newBalance int64,
+) error {
+
+	query := `UPDATE accounts SET balance = $1 WHERE id = $2`
+
+	_, err := tx.Exec(ctx, query, newBalance, accountID)
+
+	return err
+}
+
+func (r *Repository) InsertTransactionTx(
+	ctx context.Context,
+	tx pgx.Tx,
+	accountID uuid.UUID,
+	txType string,
+	amount int64,
+	status string,
+	balanceBefore int64,
+	balanceAfter int64,
+) error {
+
+	query := `
+		INSERT INTO transactions
+		(account_id, type, amount, status, balance_before, balance_after)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`
+
+	_, err := tx.Exec(
+		ctx,
+		query,
+		accountID,
+		txType,
+		amount,
+		status,
+		balanceBefore,
+		balanceAfter,
+	)
+
+	return err
+}
