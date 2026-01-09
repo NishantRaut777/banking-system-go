@@ -9,11 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/NishantRaut777/banking-api/internal/config"
-	"github.com/NishantRaut777/banking-api/internal/database"
-	"github.com/NishantRaut777/banking-api/internal/routes"
-	"github.com/NishantRaut777/banking-api/internal/utils"
+	"github.com/NishantRaut777/banking-system-go/internal/config"
+	"github.com/NishantRaut777/banking-system-go/internal/database"
+	"github.com/NishantRaut777/banking-system-go/internal/routes"
+	"github.com/NishantRaut777/banking-system-go/internal/utils"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 )
 
@@ -40,6 +42,14 @@ func Start() {
 	router.Use(gin.Recovery())
 
 	routes.Register(router, cfg)
+
+	router.GET("/swagger/*any",
+		ginSwagger.WrapHandler(
+			swaggerFiles.Handler,
+			ginSwagger.URL("doc.json"),
+			ginSwagger.DefaultModelsExpandDepth(-1),
+		),
+	)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{

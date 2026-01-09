@@ -1,0 +1,383 @@
+basePath: /api/v1
+definitions:
+  dto.DepositRequest:
+    properties:
+      account_id:
+        example: b2c1d9a2-7c2e-4b8b-a7a2-9e4a3f9d2e11 (accountid value from getmyaccount)
+        type: string
+      amount:
+        example: 1000
+        type: integer
+    required:
+    - account_id
+    - amount
+    type: object
+  dto.DepositResponse:
+    properties:
+      message:
+        example: deposit successful
+        type: string
+    type: object
+  dto.DepositResponseClientError:
+    properties:
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  dto.GetMyAccount:
+    properties:
+      account_number:
+        example: BANK2025000001
+        type: string
+      balance:
+        example: 5000
+        type: integer
+      created_at:
+        type: string
+      id:
+        example: b2c1d9a2-7c2e-4b8b-a7a2-9e4a3f9d2e11
+        type: string
+      status:
+        example: active
+        type: string
+      user_id:
+        example: b2c1d9a2-7c2e-4b8b-a7a2-9e4a3f9d2e11
+        type: string
+    type: object
+  dto.GetMyAccountServerError:
+    properties:
+      message:
+        example: Internal server error
+        type: string
+    type: object
+  dto.GetMyAccountUnathorised:
+    properties:
+      message:
+        example: invalid or expired token
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        example: john@gmail.com
+        type: string
+      password:
+        example: StrongPass123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  dto.LoginResponseClientError:
+    properties:
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  dto.LoginResponseServerError:
+    properties:
+      message:
+        example: Internal Server Error
+        type: string
+    type: object
+  dto.SignupRequest:
+    properties:
+      email:
+        example: johndoe@gmail.com
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: StrongPass123
+        minLength: 8
+        type: string
+      pin:
+        example: "1234"
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - pin
+    type: object
+  dto.SignupResponse:
+    properties:
+      message:
+        example: user registered successfully
+        type: string
+    type: object
+  dto.SignupResponseClientError:
+    properties:
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  dto.SignupResponseServerError:
+    properties:
+      message:
+        example: Internal Server Error
+        type: string
+    type: object
+  dto.TransferRequest:
+    properties:
+      amount:
+        example: 200
+        type: integer
+      from_account_id:
+        example: b2c1d9a2-7c2e-4b8b-a7a2-9e4a3f9d2e11 (accountid value from getmyaccount)
+        type: string
+      to_account_id:
+        example: b2c1d9a2-7c2e-4b8b-a7a2-9e4a3f9d2e11 (accountid value of receiver
+          account)
+        type: string
+    required:
+    - amount
+    - from_account_id
+    - to_account_id
+    type: object
+  dto.TransferResponse:
+    properties:
+      message:
+        example: transfer successful
+        type: string
+    type: object
+  dto.TransferResponseClientError:
+    properties:
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  dto.TransferResponseServerError:
+    properties:
+      message:
+        example: Internal Server Error
+        type: string
+    type: object
+  dto.WithdrawRequest:
+    properties:
+      account_id:
+        example: b2c1d9a2-7c2e-4b8b-a7a2-9e4a3f9d2e11 (accountid value from getmyaccount)
+        type: string
+      amount:
+        example: 500
+        type: integer
+    required:
+    - account_id
+    - amount
+    type: object
+  dto.WithdrawResponse:
+    properties:
+      message:
+        example: withdraw successful
+        type: string
+    type: object
+  dto.WithdrawResponseClientError:
+    properties:
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  dto.WithdrawResponseServerError:
+    properties:
+      message:
+        example: Internal Server Error
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Banking system REST API built with Go & Gin
+  title: Banking API
+  version: "1.0"
+paths:
+  /accounts:
+    get:
+      description: Returns account details of logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetMyAccount'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.GetMyAccountUnathorised'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.GetMyAccountServerError'
+      security:
+      - BearerAuth: []
+      summary: Get logged-in user's account
+      tags:
+      - Transaction
+  /accounts/deposit:
+    post:
+      consumes:
+      - application/json
+      description: Deposit money into logged-in user's account
+      parameters:
+      - description: Deposit payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DepositRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DepositResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.DepositResponseClientError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.TransferResponseServerError'
+      security:
+      - BearerAuth: []
+      summary: Deposit money
+      tags:
+      - Transaction
+  /accounts/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Transfer money to another account
+      parameters:
+      - description: Transfer payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TransferResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.TransferResponseClientError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.TransferResponseServerError'
+      security:
+      - BearerAuth: []
+      summary: Transfer money
+      tags:
+      - Transaction
+  /accounts/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Withdraw money from logged-in user's account
+      parameters:
+      - description: Withdraw payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WithdrawRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.WithdrawResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.WithdrawResponseClientError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.WithdrawResponseServerError'
+      security:
+      - BearerAuth: []
+      summary: Withdraw money
+      tags:
+      - Transaction
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.LoginResponseClientError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.LoginResponseServerError'
+      summary: Login user
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Signup payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SignupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.SignupResponseClientError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.SignupResponseServerError'
+      summary: Register a new user
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

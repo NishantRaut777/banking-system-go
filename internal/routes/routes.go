@@ -1,10 +1,10 @@
 package routes
 
 import (
-	"github.com/NishantRaut777/banking-api/internal/account"
-	"github.com/NishantRaut777/banking-api/internal/auth"
-	"github.com/NishantRaut777/banking-api/internal/config"
-	"github.com/NishantRaut777/banking-api/internal/middleware"
+	"github.com/NishantRaut777/banking-system-go/internal/account"
+	"github.com/NishantRaut777/banking-system-go/internal/auth"
+	"github.com/NishantRaut777/banking-system-go/internal/config"
+	"github.com/NishantRaut777/banking-system-go/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,7 +38,7 @@ func Register(router *gin.Engine, cfg *config.Config) {
 			accountGroup := v1.Group("/accounts")
 			accountGroup.Use(middleware.AuthMiddleware([]byte(cfg.JWTSecret)))
 			{
-				accountGroup.GET("/", accountHandler.GetMyAccounts)
+				accountGroup.GET("/", accountHandler.GetMyAccount)
 				accountGroup.GET("/:id", accountHandler.GetAccount)
 				accountGroup.POST("/deposit", accountHandler.Deposit)
 				accountGroup.POST("/withdraw", accountHandler.Withdraw)
@@ -51,6 +51,6 @@ func Register(router *gin.Engine, cfg *config.Config) {
 func health(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  "ok",
-		"service": "banking-api",
+		"service": "banking-system-go",
 	})
 }

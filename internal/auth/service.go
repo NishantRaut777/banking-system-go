@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/NishantRaut777/banking-api/internal/database"
-	"github.com/NishantRaut777/banking-api/internal/models"
-	"github.com/NishantRaut777/banking-api/internal/utils"
+	"github.com/NishantRaut777/banking-system-go/internal/database"
+	"github.com/NishantRaut777/banking-system-go/internal/models"
+	"github.com/NishantRaut777/banking-system-go/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )

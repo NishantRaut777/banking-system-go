@@ -3,7 +3,7 @@ package auth
 import (
 	"net/http"
 
-	"github.com/NishantRaut777/banking-api/internal/models"
+	"github.com/NishantRaut777/banking-system-go/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -16,6 +16,17 @@ func NewHandler(service AuthService) *Handler {
 	return &Handler{service: service}
 }
 
+// Signup godoc
+// @Summary Register a new user
+// @Description Create a new user account
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body dto.SignupRequest true "Signup payload"
+// @Success 201 {object} dto.SignupResponse
+// @Failure 400 {object} dto.SignupResponseClientError
+// @Failure 500 {object} dto.SignupResponseServerError
+// @Router /auth/signup [post]
 func (h *Handler) Signup(c *gin.Context) {
 	var req models.SignupRequest
 
@@ -46,6 +57,17 @@ func (h *Handler) Signup(c *gin.Context) {
 	})
 }
 
+// Login godoc
+// @Summary Login user
+// @Description Authenticate user and return JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body dto.LoginRequest true "Login payload"
+// @Success 200 {object} dto.LoginResponse
+// @Failure 400 {object} dto.LoginResponseClientError
+// @Failure 500 {object} dto.LoginResponseServerError
+// @Router /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req models.LoginRequest
 

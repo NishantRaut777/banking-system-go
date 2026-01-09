@@ -3,13 +3,13 @@ package account
 import (
 	"context"
 
-	"github.com/NishantRaut777/banking-api/internal/models"
+	"github.com/NishantRaut777/banking-system-go/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
 type AccountService interface {
-	GetMyAccounts(ctx context.Context, userID uuid.UUID) ([]models.Account, error)
+	GetMyAccount(ctx context.Context, userID uuid.UUID) (*models.Account, error, int)
 
 	GetAccountByID(ctx context.Context, userID, accountID uuid.UUID) (*models.Account, error)
 
@@ -34,10 +34,10 @@ type AccountService interface {
 }
 
 type AccountRepository interface {
-	FindByUserID(
+	FindMyAccount(
 		ctx context.Context,
 		userID uuid.UUID,
-	) ([]models.Account, error)
+	) (*models.Account, error, int)
 
 	FindByIDAndUserID(
 		ctx context.Context,

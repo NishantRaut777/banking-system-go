@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/NishantRaut777/banking-api/internal/database"
-	"github.com/NishantRaut777/banking-api/internal/models"
+	"github.com/NishantRaut777/banking-system-go/internal/database"
+	"github.com/NishantRaut777/banking-system-go/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -18,12 +18,12 @@ func NewService(repo AccountRepository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) GetMyAccounts(
+func (s *Service) GetMyAccount(
 	ctx context.Context,
 	userID uuid.UUID,
-) ([]models.Account, error) {
+) (*models.Account, error, int) {
 
-	return s.repo.FindByUserID(ctx, userID)
+	return s.repo.FindMyAccount(ctx, userID)
 }
 
 func (s *Service) GetAccountByID(

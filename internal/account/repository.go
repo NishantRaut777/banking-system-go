@@ -3,9 +3,10 @@ package account
 import (
 	"context"
 	"errors"
+	"net/http"
 
-	"github.com/NishantRaut777/banking-api/internal/database"
-	"github.com/NishantRaut777/banking-api/internal/models"
+	"github.com/NishantRaut777/banking-system-go/internal/database"
+	"github.com/NishantRaut777/banking-system-go/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -16,37 +17,33 @@ func NewRepository() *Repository {
 	return &Repository{}
 }
 
-func (r *Repository) FindByUserID(
+func (r *Repository) FindMyAccount(
 	ctx context.Context,
 	userID uuid.UUID,
-) ([]models.Account, error) {
+) (*models.Account, error, int) {
+
+	var status int
+	status = http.StatusOK
 
 	query := `SELECT id, user_id, account_number, balance, status, created_at FROM accounts WHERE user_id = $1`
 
-	rows, err := database.DB.Query(ctx, query, userID)
+	var account models.Account
+	err := database.DB.QueryRow(ctx, query, userID).
+		Scan(
+			&account.ID,
+			&account.UserID,
+			&account.AccountNumber,
+			&account.Balance,
+			&account.Status,
+			&account.CreatedAt,
+		)
+
 	if err != nil {
-		return nil, err
+		status = http.StatusBadRequest
+		return nil, err, status
 	}
 
-	defer rows.Close()
-
-	var accounts []models.Account
-
-	for rows.Next() {
-		var a models.Account
-		if err := rows.Scan(
-			&a.ID,
-			&a.UserID,
-			&a.AccountNumber,
-			&a.Balance,
-			&a.Status,
-			&a.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		accounts = append(accounts, a)
-	}
-	return accounts, nil
+	return &account, nil, status
 }
 
 func (r *Repository) FindByIDAndUserID(
